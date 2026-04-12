@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chamado.numero_chamado }} — Sistema de Chamados{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('index') }}" class="text-muted text-decoration-none" style="font-size:0.85rem;">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+        <h1 class="mt-1">
+            <span class="numero-chamado">{{ chamado.numero_chamado }}</span>
+        </h1>
+        <div class="mt-1">
+            <span class="badge status-badge bg-{{ chamado.status_color }} me-2">{{ chamado.status }}</span>
+            <span class="text-muted" style="font-size:0.82rem;">
+                <i class="bi bi-clock me-1"></i>Criado em {{ chamado.created_at_fmt }}
+            </span>
+        </div>
+    </div>
+    <a href="{{ url_for('editar_chamado', chamado_id=chamado.id) }}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-1"></i>Editar
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- DADOS PRINCIPAIS -->
+    <div class="col-lg-8">
+
+        <!-- SOLICITANTE -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person me-2 text-primary"></i>Dados do Solicitante</h6>
+            </div>
+            <div class="card-body">
+                <div class="detail-row">
+                    <div class="detail-label">Nome</div>
+                    <div class="detail-value fw-semibold">{{ chamado.nome_solicitante }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Setor / Cargo</div>
+                    <div class="detail-value">{{ chamado.setor_cargo }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANDIDATO -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2 text-primary"></i>Dados do Candidato</h6>
+            </div>
+            <div class="card-body">
+                <div class="detail-row">
+                    <div class="detail-label">Nome</div>
+                    <div class="detail-value fw-semibold">{{ chamado.nome_candidato }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">CPF</div>
+                    <div class="detail-value" style="font-family:monospace;">{{ chamado.cpf_fmt }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Nº de Inscrição</div>
+                    <div class="detail-value">{{ chamado.numero_inscricao }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Concurso / Processo</div>
+                    <div class="detail-value">{{ chamado.concurso_processo }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OBSERVAÇÕES -->
+        {% if chamado.observacoes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-chat-text me-2 text-primary"></i>Observações</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-0" style="white-space:pre-wrap;font-size:0.93rem;">{{ chamado.observacoes }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- COLUNA DIREITA -->
+    <div class="col-lg-4">
+
+        <!-- ALTERAR STATUS -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-toggle-on me-2 text-primary"></i>Atualizar Status</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('atualizar_status', chamado_id=chamado.id) }}">
+                    <div class="mb-3">
+                        {% for s in status_options %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="status"
+                                   id="status_{{ loop.index }}" value="{{ s }}"
+                                   {{ 'checked' if chamado.status == s }}>
+                            <label class="form-check-label d-flex align-items-center gap-2"
+                                   for="status_{{ loop.index }}">
+                                <span class="badge bg-{{ status_colors[s] }}" style="font-size:0.75rem;">{{ s }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-check2 me-1"></i>Salvar Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- DATAS -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-calendar me-2 text-primary"></i>Datas</h6>
+            </div>
+            <div class="card-body">
+                <div class="detail-row">
+                    <div class="detail-label">Solicitação</div>
+                    <div class="detail-value">{{ chamado.data_solicitacao_fmt }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Concurso</div>
+                    <div class="detail-value">
+                        {{ chamado.data_concurso_fmt if chamado.data_concurso_fmt else '—' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

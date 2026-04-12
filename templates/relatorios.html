@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios — Sistema de Chamados{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-bar-chart-line me-2"></i>Relatórios</h1>
+</div>
+
+<!-- RESUMO -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <div style="font-size:2.5rem;font-weight:700;color:#1a56db;">{{ total }}</div>
+            <div class="text-muted" style="font-size:0.88rem;">Total de Chamados</div>
+        </div>
+    </div>
+    {% for s in status_options %}
+    <div class="col-md-3 col-6">
+        <div class="card text-center p-3">
+            <div style="font-size:2rem;font-weight:700;">{{ por_status[s] }}</div>
+            <div>
+                <span class="badge bg-{{ status_colors[s] }}" style="font-size:0.78rem;">{{ s }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- EXPORTAR CSV -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-download me-2 text-success"></i>Exportar Relatório CSV</h6>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('exportar_csv') }}" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    {% for s in status_options %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data inicial</label>
+                <input type="date" name="data_inicio" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data final</label>
+                <input type="date" name="data_fim" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="busca" class="form-control" placeholder="Nome, nº chamado...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-filetype-csv me-1"></i>Exportar
+                </button>
+            </div>
+        </form>
+        <p class="text-muted mt-2 mb-0" style="font-size:0.82rem;">
+            <i class="bi bi-info-circle me-1"></i>
+            O arquivo CSV gerado é compatível com Excel e Google Sheets. Use ponto-e-vírgula (;) como delimitador na importação.
+        </p>
+    </div>
+</div>
+
+<!-- ÚLTIMOS 10 -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i>Últimos 10 Chamados</h6>
+    </div>
+    <div class="card-body p-0">
+        {% if ultimos %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Nº Chamado</th>
+                        <th>Status</th>
+                        <th>Solicitante</th>
+                        <th>Candidato</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in ultimos %}
+                    <tr>
+                        <td><span class="numero-chamado">{{ c.numero_chamado }}</span></td>
+                        <td><span class="badge status-badge bg-{{ c.status_color }}">{{ c.status }}</span></td>
+                        <td style="font-size:0.9rem;">{{ c.nome_solicitante }}</td>
+                        <td style="font-size:0.9rem;">{{ c.nome_candidato }}</td>
+                        <td style="font-size:0.88rem;">{{ c.data_solicitacao_fmt }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">Nenhum chamado cadastrado ainda.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

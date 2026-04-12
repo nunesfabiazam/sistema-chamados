@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — Sistema de Chamados{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('index') }}" class="text-muted text-decoration-none" style="font-size:0.85rem;">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+        <h1 class="mt-1">
+            <i class="bi bi-{{ 'pencil' if chamado_id else 'plus-circle' }} me-2"></i>{{ title }}
+            {% if numero_chamado %}
+            <span class="numero-chamado ms-2" style="font-size:1rem;">{{ numero_chamado }}</span>
+            {% endif %}
+        </h1>
+    </div>
+</div>
+
+<form method="post" novalidate>
+    <div class="row g-4">
+
+        <!-- COLUNA ESQUERDA -->
+        <div class="col-lg-8">
+
+            <!-- DADOS DO SOLICITANTE -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-person me-2 text-primary"></i>Dados do Solicitante</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label">Nome do Solicitante <span class="text-danger">*</span></label>
+                            <input type="text" name="nome_solicitante" class="form-control"
+                                   placeholder="Ex: Maria da Silva"
+                                   value="{{ form_data.get('nome_solicitante', '') }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Setor e Cargo <span class="text-danger">*</span></label>
+                            <input type="text" name="setor_cargo" class="form-control"
+                                   placeholder="Ex: RH — Analista"
+                                   value="{{ form_data.get('setor_cargo', '') }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DADOS DO CANDIDATO -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2 text-primary"></i>Dados do Candidato</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome do Candidato <span class="text-danger">*</span></label>
+                            <input type="text" name="nome_candidato" class="form-control"
+                                   placeholder="Nome completo"
+                                   value="{{ form_data.get('nome_candidato', '') }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">CPF do Candidato <span class="text-danger">*</span></label>
+                            <input type="text" name="cpf_candidato" class="form-control"
+                                   id="cpf_input"
+                                   placeholder="000.000.000-00"
+                                   value="{{ form_data.get('cpf_candidato', '') }}"
+                                   maxlength="14" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Número de Inscrição <span class="text-danger">*</span></label>
+                            <input type="text" name="numero_inscricao" class="form-control"
+                                   placeholder="Ex: 123456"
+                                   value="{{ form_data.get('numero_inscricao', '') }}" required>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label">Concurso e Nº do Processo Judicial <span class="text-danger">*</span></label>
+                            <input type="text" name="concurso_processo" class="form-control"
+                                   placeholder="Ex: Concurso TRT 2024 — Proc. 0001234-56.2024.5.00.0000"
+                                   value="{{ form_data.get('concurso_processo', '') }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OBSERVAÇÕES -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-chat-text me-2 text-primary"></i>Observações Relevantes</h6>
+                </div>
+                <div class="card-body">
+                    <textarea name="observacoes" id="observacoes" class="form-control"
+                              rows="5" maxlength="600"
+                              placeholder="Descreva informações relevantes sobre este chamado (máximo 600 caracteres)...">{{ form_data.get('observacoes', '') }}</textarea>
+                    <div class="d-flex justify-content-end mt-1">
+                        <span class="char-counter text-muted">
+                            <span id="char-count">{{ form_data.get('observacoes', '')|length }}</span>/600 caracteres
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="col-lg-4">
+
+            <!-- STATUS (só na edição) -->
+            {% if chamado_id and status_options %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-toggle-on me-2 text-primary"></i>Status</h6>
+                </div>
+                <div class="card-body">
+                    <select name="status" class="form-select">
+                        {% for s in status_options %}
+                        <option value="{{ s }}" {{ 'selected' if form_data.get('status') == s }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- DATAS -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-calendar me-2 text-primary"></i>Datas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Data da Solicitação <span class="text-danger">*</span></label>
+                        <input type="date" name="data_solicitacao" class="form-control"
+                               value="{{ form_data.get('data_solicitacao', '') }}" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Data do Concurso</label>
+                        <input type="date" name="data_concurso" class="form-control"
+                               value="{{ form_data.get('data_concurso', '') }}">
+                        <div class="form-text">Opcional</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AÇÕES -->
+            <div class="card">
+                <div class="card-body">
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-{{ 'floppy' if chamado_id else 'plus-circle' }} me-2"></i>
+                        {{ 'Salvar Alterações' if chamado_id else 'Criar Chamado' }}
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-light w-100">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Contador de caracteres
+    const obs = document.getElementById('observacoes');
+    const counter = document.getElementById('char-count');
+    if (obs) {
+        obs.addEventListener('input', function() {
+            const len = this.value.length;
+            counter.textContent = len;
+            counter.style.color = len > 550 ? (len >= 600 ? '#dc3545' : '#f59e0b') : '';
+        });
+    }
+
+    // Máscara CPF
+    const cpfInput = document.getElementById('cpf_input');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function() {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            if (v.length >= 10) {
+                v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            } else if (v.length >= 7) {
+                v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            } else if (v.length >= 4) {
+                v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            }
+            this.value = v;
+        });
+    }
+</script>
+{% endblock %}

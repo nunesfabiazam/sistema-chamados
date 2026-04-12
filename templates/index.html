@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Chamados — Sistema de Chamados{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#64748b,#475569);">
+            <div class="stat-value">{{ stats['Solicitado'] }}</div>
+            <div class="stat-label">Solicitado</div>
+            <i class="bi bi-inbox stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#f59e0b,#d97706);">
+            <div class="stat-value">{{ stats['Em Verificação'] }}</div>
+            <div class="stat-label">Em Verificação</div>
+            <i class="bi bi-search stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#1a56db,#1245b0);">
+            <div class="stat-value">{{ stats['Em Andamento'] }}</div>
+            <div class="stat-label">Em Andamento</div>
+            <i class="bi bi-gear stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#16a34a,#15803d);">
+            <div class="stat-value">{{ stats['Finalizado'] }}</div>
+            <div class="stat-label">Finalizado</div>
+            <i class="bi bi-check-circle stat-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- HEADER + BUSCA -->
+<div class="card mb-0">
+    <div class="card-header">
+        <div class="page-header">
+            <h1><i class="bi bi-list-ul me-2"></i>Chamados</h1>
+            <a href="{{ url_for('novo_chamado') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Novo Chamado
+            </a>
+        </div>
+
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label mb-1">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="busca" class="form-control"
+                           placeholder="Número, solicitante ou candidato..."
+                           value="{{ busca }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label mb-1">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    {% for s in status_options %}
+                    <option value="{{ s }}" {{ 'selected' if status_filtro == s }}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel me-1"></i>Filtrar
+                </button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('exportar_csv', status=status_filtro, busca=busca) }}"
+                   class="btn btn-outline-success w-100">
+                    <i class="bi bi-download me-1"></i>CSV
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card-body p-0">
+        {% if chamados %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nº Chamado</th>
+                        <th>Status</th>
+                        <th>Solicitante</th>
+                        <th>Candidato</th>
+                        <th>CPF</th>
+                        <th>Concurso / Processo</th>
+                        <th>Data Solicitação</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in chamados %}
+                    <tr>
+                        <td>
+                            <span class="numero-chamado">{{ c.numero_chamado }}</span>
+                        </td>
+                        <td>
+                            <span class="badge status-badge bg-{{ c.status_color }}">
+                                {{ c.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold" style="font-size:0.9rem;">{{ c.nome_solicitante }}</div>
+                            <div style="font-size:0.78rem;color:#64748b;">{{ c.setor_cargo }}</div>
+                        </td>
+                        <td style="font-size:0.9rem;">{{ c.nome_candidato }}</td>
+                        <td style="font-size:0.85rem;font-family:monospace;">{{ c.cpf_fmt }}</td>
+                        <td style="font-size:0.85rem;max-width:200px;">
+                            <div class="text-truncate" title="{{ c.concurso_processo }}">
+                                {{ c.concurso_processo }}
+                            </div>
+                        </td>
+                        <td style="font-size:0.88rem;">{{ c.data_solicitacao_fmt }}</td>
+                        <td class="text-center">
+                            <a href="{{ url_for('ver_chamado', chamado_id=c.id) }}"
+                               class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('editar_chamado', chamado_id=c.id) }}"
+                               class="btn btn-sm btn-outline-secondary ms-1" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 border-top" style="font-size:0.83rem;color:#64748b;">
+            {{ chamados|length }} chamado(s) encontrado(s)
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox" style="font-size:3rem;display:block;margin-bottom:1rem;"></i>
+            <p class="mb-0">Nenhum chamado encontrado.</p>
+            <a href="{{ url_for('novo_chamado') }}" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-lg me-1"></i>Criar primeiro chamado
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

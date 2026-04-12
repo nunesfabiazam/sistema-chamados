@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Chamados{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 240px;
+            --primary: #1a56db;
+            --primary-dark: #1245b0;
+            --bg: #f0f4fa;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar-top {
+            background: linear-gradient(135deg, #1a56db 0%, #0e3a8c 100%);
+            height: 60px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .navbar-top .brand {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-top .brand i { font-size: 1.4rem; }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 60px; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            z-index: 1020;
+            padding: 1rem 0;
+        }
+        .sidebar .nav-link {
+            color: #475569;
+            padding: 0.6rem 1.4rem;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.93rem;
+            transition: all 0.15s;
+        }
+        .sidebar .nav-link:hover {
+            background: #eff6ff;
+            color: var(--primary);
+        }
+        .sidebar .nav-link.active {
+            background: #dbeafe;
+            color: var(--primary);
+            font-weight: 600;
+            border-right: 3px solid var(--primary);
+        }
+        .sidebar .nav-section {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            padding: 1rem 1.4rem 0.3rem;
+            text-transform: uppercase;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* CARDS */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.5rem;
+        }
+
+        /* STAT CARDS */
+        .stat-card {
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card .stat-icon {
+            position: absolute;
+            right: 1rem;
+            bottom: 0.5rem;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+        .stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-card .stat-label { font-size: 0.85rem; opacity: 0.9; }
+
+        /* BADGES */
+        .status-badge {
+            font-size: 0.78rem;
+            padding: 0.35em 0.8em;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* TABLE */
+        .table th {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            background: #f8fafc;
+        }
+        .table td { vertical-align: middle; }
+        .table tbody tr:hover { background: #f1f5fd; }
+        .numero-chamado {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        /* FORM */
+        .form-label { font-weight: 600; font-size: 0.88rem; color: #374151; }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border-color: #cbd5e1;
+            font-size: 0.93rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,86,219,0.15);
+        }
+        .char-counter { font-size: 0.78rem; }
+
+        /* BUTTONS */
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+        /* ALERTS */
+        .alert { border-radius: 10px; border: none; }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* DETAIL ROW */
+        .detail-row {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            min-width: 160px;
+        }
+        .detail-value { color: #1e293b; font-size: 0.93rem; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar-top">
+        <a href="{{ url_for('index') }}" class="brand">
+            <i class="bi bi-ticket-detailed"></i>
+            Sistema de Chamados
+        </a>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="nav-section">Menu</div>
+        <a href="{{ url_for('index') }}"
+           class="nav-link {{ 'active' if request.endpoint == 'index' else '' }}">
+            <i class="bi bi-list-ul"></i> Todos os Chamados
+        </a>
+        <a href="{{ url_for('novo_chamado') }}"
+           class="nav-link {{ 'active' if request.endpoint == 'novo_chamado' else '' }}">
+            <i class="bi bi-plus-circle"></i> Novo Chamado
+        </a>
+        <a href="{{ url_for('relatorios') }}"
+           class="nav-link {{ 'active' if request.endpoint == 'relatorios' else '' }}">
+            <i class="bi bi-bar-chart-line"></i> Relatórios
+        </a>
+
+        <div class="nav-section mt-2">Filtrar por Status</div>
+        <a href="{{ url_for('index') }}"
+           class="nav-link {{ 'active' if not request.args.get('status') and request.endpoint == 'index' else '' }}">
+            <i class="bi bi-circle"></i> Todos
+        </a>
+        <a href="{{ url_for('index', status='Solicitado') }}"
+           class="nav-link {{ 'active' if request.args.get('status') == 'Solicitado' else '' }}">
+            <span class="badge bg-secondary rounded-pill me-1">●</span> Solicitado
+        </a>
+        <a href="{{ url_for('index', status='Em Verificação') }}"
+           class="nav-link {{ 'active' if request.args.get('status') == 'Em Verificação' else '' }}">
+            <span class="badge bg-warning rounded-pill me-1">●</span> Em Verificação
+        </a>
+        <a href="{{ url_for('index', status='Em Andamento') }}"
+           class="nav-link {{ 'active' if request.args.get('status') == 'Em Andamento' else '' }}">
+            <span class="badge bg-primary rounded-pill me-1">●</span> Em Andamento
+        </a>
+        <a href="{{ url_for('index', status='Finalizado') }}"
+           class="nav-link {{ 'active' if request.args.get('status') == 'Finalizado' else '' }}">
+            <span class="badge bg-success rounded-pill me-1">●</span> Finalizado
+        </a>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}-fill me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

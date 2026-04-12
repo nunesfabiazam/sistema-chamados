@@ -1,0 +1,175 @@
+================================================================
+  GUIA COMPLETO DE DEPLOY — GitHub + Neon + Vercel
+  Sistema de Chamados
+================================================================
+
+STACK UTILIZADA
+---------------
+  Código/App  →  GitHub (controle de versão)
+  Banco       →  Neon   (PostgreSQL gratuito na nuvem)
+  Hospedagem  →  Vercel (deploy automático via GitHub)
+
+
+================================================================
+  ETAPA 1 — DOWNLOAD E CONFIGURAÇÃO LOCAL
+================================================================
+
+1. Baixe o ZIP "sistema_chamados_vercel.zip" e extraia em uma pasta
+   no seu computador. Exemplo: C:\Projetos\sistema_chamados
+
+2. Instale o Python 3.9+ se ainda não tiver:
+   https://www.python.org/downloads/
+
+3. Instale as dependências localmente (opcional, para testar):
+   pip install -r requirements.txt
+
+
+================================================================
+  ETAPA 2 — CRIAR BANCO DE DADOS NO NEON (gratuito)
+================================================================
+
+1. Acesse https://neon.tech e clique em "Sign Up"
+   (pode usar sua conta Google ou GitHub)
+
+2. Após o login, clique em "New Project"
+   - Project name: sistema-chamados (ou o que preferir)
+   - Region: escolha a mais próxima (ex: US East, EU West)
+   - Clique em "Create project"
+
+3. Na tela seguinte, copie a "Connection string"
+   Ela terá o formato:
+   postgresql://usuario:senha@host.neon.tech/nomedb?sslmode=require
+
+   GUARDE ESSE TEXTO — você vai usar nas próximas etapas!
+
+4. Agora crie as tabelas. No seu computador, abra o terminal
+   na pasta do projeto e execute:
+
+   Windows PowerShell:
+     $env:DATABASE_URL="SUA_CONNECTION_STRING_AQUI"
+     python create_tables.py
+
+   Mac / Linux:
+     export DATABASE_URL="SUA_CONNECTION_STRING_AQUI"
+     python create_tables.py
+
+   Você verá: "Tabela criada com sucesso!"
+
+
+================================================================
+  ETAPA 3 — SUBIR O CÓDIGO NO GITHUB
+================================================================
+
+1. Crie uma conta em https://github.com se ainda não tiver
+
+2. Clique em "+" (canto superior direito) → "New repository"
+   - Repository name: sistema-chamados
+   - Visibility: Private (recomendado, pois é sistema interno)
+   - NÃO marque "Initialize this repository"
+   - Clique em "Create repository"
+
+3. Instale o Git no seu computador:
+   https://git-scm.com/downloads
+
+4. No terminal, dentro da pasta do projeto, execute:
+
+   git init
+   git add .
+   git commit -m "primeira versão do sistema de chamados"
+   git branch -M main
+   git remote add origin https://github.com/SEU_USUARIO/sistema-chamados.git
+   git push -u origin main
+
+   (Substitua SEU_USUARIO pelo seu nome de usuário do GitHub)
+
+   O GitHub vai pedir seu usuário e senha (ou token de acesso).
+
+
+================================================================
+  ETAPA 4 — FAZER DEPLOY NO VERCEL
+================================================================
+
+1. Acesse https://vercel.com e clique em "Sign Up"
+   Entre com sua conta do GitHub (facilita a integração)
+
+2. No painel do Vercel, clique em "Add New..." → "Project"
+
+3. Em "Import Git Repository", selecione o repositório
+   "sistema-chamados" que você acabou de criar
+
+4. Na tela de configuração:
+   - Framework Preset: Other
+   - Root Directory: ./  (deixe o padrão)
+   - Não precisa alterar mais nada por enquanto
+   - AINDA NÃO clique em Deploy!
+
+5. Clique em "Environment Variables" para adicionar as variáveis:
+
+   Clique em "+ Add" e adicione:
+
+   Nome:   DATABASE_URL
+   Valor:  postgresql://usuario:senha@host.neon.tech/db?sslmode=require
+   (cole aqui a connection string do Neon)
+
+   Nome:   SECRET_KEY
+   Valor:  (crie uma senha aleatória, ex: minha-chave-super-secreta-2026)
+
+6. Agora clique em "Deploy"
+
+7. Aguarde 1-2 minutos. Quando terminar, o Vercel vai mostrar
+   a URL do seu sistema, algo como:
+   https://sistema-chamados-xxxx.vercel.app
+
+   Pronto! Seu sistema está online!
+
+
+================================================================
+  ETAPA 5 — ATUALIZAÇÕES FUTURAS
+================================================================
+
+Toda vez que você quiser atualizar o sistema:
+
+1. Faça as alterações nos arquivos
+2. No terminal:
+   git add .
+   git commit -m "descrição da alteração"
+   git push
+
+O Vercel detecta automaticamente o push e faz um novo deploy!
+
+
+================================================================
+  DICAS IMPORTANTES
+================================================================
+
+SEGURANÇA:
+- NUNCA coloque a DATABASE_URL diretamente no código
+- NUNCA faça commit do arquivo .env
+- O arquivo .gitignore já está configurado para proteger isso
+
+BANCO DE DADOS:
+- O plano gratuito do Neon inclui:
+  • 0,5 GB de armazenamento
+  • Conexões ilimitadas
+  • Sem expiração
+- Para ver os dados diretamente, use o "SQL Editor" no painel do Neon
+
+VERCEL:
+- O plano gratuito (Hobby) inclui:
+  • 100 GB de bandwidth/mês
+  • Deployments ilimitados
+  • Suficiente para uso interno
+
+DOMÍNIO PERSONALIZADO (opcional):
+- No painel do Vercel, vá em Settings → Domains
+- Você pode adicionar um domínio próprio gratuitamente
+
+
+================================================================
+  SUPORTE
+================================================================
+
+Se tiver dúvidas:
+- Neon docs:   https://neon.tech/docs
+- Vercel docs: https://vercel.com/docs
+- Flask docs:  https://flask.palletsprojects.com
